@@ -1,0 +1,15 @@
+{
+    "title": "Example Domain",
+    "source": "blog",
+    "topics": [
+        "documentation",
+        "documentation examples",
+        "domain",
+        "domain use",
+        "examples"
+    ],
+    "chunks": [
+        "This domain is for use in documentation examples without needing permission"
+    ],
+    "trust_score": 0.44
+}
