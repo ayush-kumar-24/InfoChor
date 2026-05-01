@@ -22,6 +22,22 @@ Lack of trust signals in content pipelines
 
 InfoChor addresses this by introducing a trust-aware ingestion layer.
 
+## Why This System Matters
+
+Most AI systems consume unstructured internet data without evaluating reliability.
+
+This leads to:
+- low-quality context in retrieval systems
+- unreliable outputs in AI assistants
+- lack of trust signals in content pipelines
+
+InfoChor introduces a trust-aware ingestion layer that ensures:
+- higher quality inputs for AI systems
+- structured and consistent data transformation
+- explainable reliability scoring
+
+This system is designed as a foundational layer for trust-aware AI applications, not just a scraping utility.
+
 System Architecture
 Input (URL)
    |
