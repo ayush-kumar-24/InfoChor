@@ -1,172 +1,114 @@
-InfoChor
-Multi-Source Data Ingestion & Trust Scoring Pipeline
+# InfoChor
+## Multi-Source Data Ingestion & Trust Scoring Pipeline
 
-Overview
+---
+
+## Overview
+
 InfoChor is a modular pipeline designed to ingest, process, and evaluate unstructured content from multiple sources such as blogs and YouTube.
+
 The system transforms raw data into structured, machine-consumable output while assigning a trust score based on explainable signals.
-This project demonstrates system design thinking for real-world AI pipelines, particularly for use cases like retrieval-augmented generation (RAG), knowledge engines, and trust-aware search systems.
 
-Why This System Matters
+This project demonstrates system design thinking for real-world AI pipelines, particularly for use cases like:
+- Retrieval-Augmented Generation (RAG)
+- Knowledge engines
+- Trust-aware search systems
+
+---
+
+## Why This System Matters
+
 Most AI systems consume unstructured internet data without evaluating reliability.
+
 This leads to:
-
-
-low-quality context in retrieval systems
-
-
-unreliable outputs in AI assistants
-
-
-lack of trust signals in content pipelines
-
+- Low-quality context in retrieval systems  
+- Unreliable outputs in AI assistants  
+- Lack of trust signals in content pipelines  
 
 InfoChor introduces a trust-aware ingestion layer that ensures:
-
-
-higher quality inputs for AI systems
-
-
-structured and consistent data transformation
-
-
-explainable reliability scoring
-
+- Higher quality inputs for AI systems  
+- Structured and consistent data transformation  
+- Explainable reliability scoring  
 
 This system is designed as a foundational layer for trust-aware AI applications, not just a scraping utility.
 
-System Workflow
-Input URL   |   v[Source Detection]   |---- Blog   |---- YouTube   |   v[Scraper Layer]   |---- Blog Scraper (HTML Parsing)   |---- YouTube Scraper (Transcript / Metadata Fallback)   |   v[Validation Layer]   |---- Source-aware content validation   |---- Failure handling   |   v[Processing Layer]   |---- Text Cleaning   |---- Noise Removal   |   v[Semantic Layer]   |---- Topic Extraction (TF-IDF + Heuristics)   |---- Content Chunking   |   v[Trust Engine]   |---- Source Credibility   |---- Content Depth   |---- Structure Quality   |---- Language Signal   |   v[Output Layer]   |---- Structured JSON   |---- Explainable Score Breakdown
+---
 
-Key Features
-Multi-Source Ingestion
-
-
-Blog scraping using HTML parsing
-
-
-YouTube ingestion via transcript API
-
-
-Metadata fallback when transcripts are unavailable
-
-
-
-Adaptive Validation
-
-
-Source-aware validation logic
-
-
-Prevents pipeline failure due to variable data formats
-
-
-
-Content Processing
-
-
-Removal of UI noise and irrelevant text
-
-
-Sentence-level filtering
-
-
-Clean normalization of extracted content
-
-
-
-Semantic Extraction
-
-
-TF-IDF based topic extraction
-
-
-Phrase prioritization and redundancy removal
-
-
-Content chunking for downstream AI systems
-
-
-
-Explainable Trust Scoring
-The trust score is computed using multiple weighted signals:
-SignalDescriptionSourceCredibility of originLengthDepth of contentStructureContent organization via chunksLanguageBasic readability signal
-The system outputs:
-
-
-final trust score
-
-
-score breakdown for transparency
-
-
-
-Robust Failure Handling
-
-
-Graceful handling of missing transcripts
-
-
-Fallback strategies for incomplete data
-
-
-Structured failure responses
-
-
-
-Example Output
-{  "status": "success",  "document": {    "title": "...",    "source": "youtube",    "word_count": 39  },  "insights": {    "topics": [...],    "trust_score": 0.49,    "score_breakdown": {      "source": 0.6,      "length": 0.3,      "language": 0.7,      "structure": 0.4    }  },  "content": {    "preview": "...",    "chunks": [...]  }}
+## System Workflow
+Input URL
+↓
+Source Detection
+├── Blog
+└── YouTube
+↓
+Scraper Layer
+├── Blog Scraper (HTML Parsing)
+└── YouTube Scraper (Transcript / Metadata Fallback)
+↓
+Validation Layer
+├── Source-aware validation
+└── Failure handling
+↓
+Processing Layer
+├── Text Cleaning
+└── Noise Removal
+↓
+Semantic Layer
+├── Topic Extraction
+└── Content Chunking
+↓
+Trust Engine
+├── Source Credibility
+├── Content Depth
+├── Structure Quality
+└── Language Signal
+↓
+Output Layer
+├── Structured JSON
+└── Explainable Score Breakdown
+---## Key Features### Multi-Source Ingestion- Blog scraping using HTML parsing  - YouTube ingestion via transcript API  - Metadata fallback when transcripts are unavailable  ### Adaptive Validation- Source-aware validation logic  - Handles variable content formats across sources  ### Content Processing- Removes UI noise and irrelevant text  - Normalizes and cleans extracted content  ### Semantic Extraction- TF-IDF based topic extraction  - Phrase prioritization and filtering  - Content chunking for AI pipelines  ### Explainable Trust Scoring| Signal | Description ||------|------------|| Source | Credibility of origin || Length | Depth of content || Structure | Organization via chunks || Language | Basic readability signal |---### Robust Failure Handling- Graceful handling of missing transcripts  - Fallback strategies for incomplete data  - Structured failure responses  ---## Example Output```json{  "status": "success",  "document": {    "title": "...",    "source": "youtube",    "word_count": 39  },  "insights": {    "topics": [...],    "trust_score": 0.49,    "score_breakdown": {      "source": 0.6,      "length": 0.3,      "language": 0.7,      "structure": 0.4    }  },  "content": {    "preview": "...",    "chunks": [...]  }}
 
 Design Decisions
 Rule-Based Trust Engine
-Chosen for:
 
 
-interpretability
+Interpretable
 
 
-deterministic behavior
+Deterministic
 
 
-ease of debugging
+Easy to debug
 
-
-Future direction includes ML-based scoring.
 
 Hybrid Topic Extraction
 
 
-TF-IDF for statistical relevance
+TF-IDF for relevance
 
 
-Heuristic filtering for semantic quality
+Heuristics for quality filtering
 
-
-Ensures meaningful topics and avoids redundancy.
 
 Source-Aware Validation
-Different content sources require different validation thresholds.
-Example:
 
 
 Blogs → long-form validation
 
 
-YouTube fallback → short-form validation
-
+YouTube → short-form fallback validation
 
 
 Fallback Strategy
-The system assumes imperfect data conditions.
-If primary extraction fails:
 
 
-fallback mechanisms are triggered
+Attempts primary extraction
 
 
-pipeline continues execution
+Falls back to metadata
 
 
-structured output is still generated
+Ensures pipeline continuity
 
 
 
@@ -176,98 +118,22 @@ src/ ├── scrapers/ │    ├── blog.py │    ├── youtube.py �
 How to Run
 Install dependencies
 pip install -r requirements.txt
-
 Run the pipeline
 python main.py
 
-Test Inputs
-Blog:
-https://example.com/blog
-YouTube:
-https://www.youtube.com/watch?v=...
-
 Assignment Coverage
-This system fulfills the assignment requirements:
 
 
-Structured Data Ingestion
-Multi-source scraping (blogs + YouTube)
+Structured Data Ingestion → Multi-source support
 
 
-Metadata Extraction
-Title, content, and semantic topics
+Metadata Extraction → Title, content, topics
 
 
-Reliability Scoring
-Explainable trust scoring engine
+Reliability Scoring → Explainable trust engine
 
 
-Real-World Robustness
-Handles missing data with fallback strategies
-
-
-
-Example Use Case
-Input:
-
-
-Blog article or YouTube video
-
-
-Output:
-
-
-Extracted topics
-
-
-Trust score with explanation
-
-
-Structured content chunks
-
-
-Enables:
-
-
-RAG pipelines
-
-
-AI assistants
-
-
-knowledge engines
-
-
-
-Current Limitations
-
-
-YouTube transcripts are not always available
-
-
-Topic extraction is heuristic-based
-
-
-Trust scoring is rule-based
-
-
-
-Future Improvements
-
-
-ML-based trust scoring
-
-
-Embedding-based topic extraction
-
-
-API layer (FastAPI)
-
-
-UI dashboard (Streamlit)
-
-
-Real-time ingestion
+Robustness → Handles missing/partial data
 
 
 
