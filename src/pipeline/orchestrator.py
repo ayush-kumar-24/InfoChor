@@ -1,4 +1,5 @@
 from src.scrapers.blog import BlogScraper
+from src.scrapers.youtube import YouTubeScraper
 from src.processing.cleaner import Processor
 from src.processing.tagging import Tagger
 from src.chunking.chunker import Chunker
@@ -10,7 +11,14 @@ class Pipeline:
 
     def run(self, url):
 
-        scraper = BlogScraper()
+        # 🔥 STEP 0 — SELECT SCRAPER (CRITICAL FIX)
+        if "youtube.com" in url or "youtu.be" in url:
+            scraper = YouTubeScraper()
+            print("🎥 USING YOUTUBE SCRAPER")
+        else:
+            scraper = BlogScraper()
+            print("📝 USING BLOG SCRAPER")
+
         processor = Processor()
         tagger = Tagger()
         chunker = Chunker()
@@ -28,11 +36,22 @@ class Pipeline:
 
         word_count = len(raw.content.split())
 
-        if word_count < 100:
-            return self._fail(file_handler, url, "Too little content")
+       # 🔥 SOURCE-AWARE VALIDATION
+        if raw.source == "youtube":
+                if word_count < 30:
+                     return self._fail(file_handler, url, "Too little content (YouTube)")
+        else:
+            if word_count < 100:
+                return self._fail(file_handler, url, "Too little content")
 
         # 🔹 Step 2: Process
         processed = processor.clean(raw)
+
+        print("\n--- BEFORE CLEANING ---")
+        print(raw.content[:300])
+
+        print("\n--- AFTER CLEANING ---")
+        print(processed["clean_content"][:300])
 
         if not processed["clean_content"] or len(processed["clean_content"]) < 50:
             return self._fail(file_handler, url, "Content too small after cleaning")
@@ -42,9 +61,10 @@ class Pipeline:
 
         # 🔹 Step 4: Chunking
         chunks = chunker.split(processed["clean_content"])
+        processed["chunks"] = chunks
 
         # 🔹 Step 5: Scoring
-        score = scorer.compute(
+        score, breakdown = scorer.compute(
             {
                 "source": raw.source,
                 "author": raw.author,
@@ -53,14 +73,26 @@ class Pipeline:
             processed
         )
 
+        # 🔥 FINAL OUTPUT (WOW FORMAT)
         result = {
             "status": "success",
-            "title": raw.title,
-            "source": raw.source,
-            "topics": topics,
-            "chunks": chunks,
-            "trust_score": score,
-            "word_count": word_count
+
+            "document": {
+                "title": raw.title,
+                "source": raw.source,
+                "word_count": word_count
+            },
+
+            "insights": {
+                "topics": topics,
+                "trust_score": score,
+                "score_breakdown": breakdown
+            },
+
+            "content": {
+                "preview": processed["clean_content"][:300],
+                "chunks": chunks[:2]
+            }
         }
 
         file_handler.save(result)

@@ -40,3 +40,46 @@ class Processor:
             "clean_content": clean_text,
             "language": lang
         }
+
+import re
+
+
+class Processor:
+
+    def clean(self, raw):
+        text = raw.content
+
+        # 🔥 Remove ONLY obvious UI junk
+        junk_patterns = [
+            r"Sign up", r"Sign in", r"Get app", r"Write", r"Search",
+            r"Sitemap", r"Mastodon",
+            r"Open in app"
+        ]
+
+        for pattern in junk_patterns:
+            text = re.sub(pattern, "", text, flags=re.IGNORECASE)
+
+        # 🔥 Remove excessive metadata (light version)
+        text = re.sub(r"\d+ min read", "", text)
+
+        # 🔥 LIGHT sentence filtering (not aggressive)
+        sentences = re.split(r'[.!?]', text)
+
+        cleaned_sentences = [
+            s.strip() for s in sentences
+            if len(s.strip()) > 25   # 🔥 lowered threshold
+        ]
+
+        # fallback (IMPORTANT)
+        if len(cleaned_sentences) < 5:
+            cleaned_text = text   # don’t destroy data
+        else:
+            cleaned_text = ". ".join(cleaned_sentences)
+
+        # 🔹 final cleanup
+        cleaned_text = " ".join(cleaned_text.split())
+
+        return {
+            "clean_content": cleaned_text,
+            "language": "en"
+        }

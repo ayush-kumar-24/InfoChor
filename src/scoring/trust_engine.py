@@ -1,41 +1,64 @@
 class TrustEngine:
 
-    def compute(self, doc, processed):
+    def compute(self, metadata, processed):
 
-        # 🔹 1. Source Score
-        source_map = {
-            "pubmed": 1.0,
-            "youtube": 0.7,
-            "blog": 0.6
-        }
-        source_score = source_map.get(doc["source"], 0.5)
+        breakdown = {}
 
-        # 🔹 2. Content Length Score
-        length = len(processed["clean_content"])
-        length_score = min(length / 2000, 1)
+        # 🔹 1. Source credibility
+        source = metadata.get("source")
 
-        # 🔹 3. Structure Score (based on sentence count)
-        sentences = processed["clean_content"].split(".")
-        structure_score = min(len(sentences) / 20, 1)
+        if source == "pubmed":
+            source_score = 0.9
+        elif source == "youtube":
+            source_score = 0.6
+        elif source == "blog":
+            source_score = 0.5
+        else:
+            source_score = 0.4
 
-        # 🔹 4. Language Score
-        language_score = 1.0 if processed["language"] == "en" else 0.5
+        breakdown["source"] = source_score
 
-        # 🔹 5. Metadata Score
-        metadata_score = 0
+        # 🔹 2. Content length quality
+        text = processed.get("clean_content", "")
+        word_count = len(text.split())
 
-        if doc.get("author"):
-            metadata_score += 0.5
-        if doc.get("publish_date"):
-            metadata_score += 0.5
+        if word_count > 1000:
+            length_score = 0.9
+        elif word_count > 500:
+            length_score = 0.75
+        elif word_count > 200:
+            length_score = 0.6
+        else:
+            length_score = 0.3
 
-        # 🔹 Final weighted score
+        breakdown["length"] = length_score
+
+        # 🔹 3. Language quality
+        if text and text[0].isupper():
+            language_score = 0.7
+        else:
+            language_score = 0.5
+
+        breakdown["language"] = language_score
+
+        # 🔹 4. Structure quality (chunks)
+        chunks = processed.get("chunks", [])
+
+        if len(chunks) > 5:
+            structure_score = 0.8
+        elif len(chunks) > 2:
+            structure_score = 0.6
+        else:
+            structure_score = 0.4
+
+        breakdown["structure"] = structure_score
+
+        # 🔥 FINAL WEIGHTED SCORE
         final_score = (
-            0.25 * source_score +
-            0.25 * length_score +
-            0.2 * structure_score +
-            0.15 * language_score +
-            0.15 * metadata_score
+            breakdown["source"] * 0.3 +
+            breakdown["length"] * 0.25 +
+            breakdown["language"] * 0.2 +
+            breakdown["structure"] * 0.25
         )
 
-        return round(final_score, 2)
+        return round(final_score, 2), breakdown

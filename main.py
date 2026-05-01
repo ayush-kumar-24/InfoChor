@@ -1,7 +1,9 @@
+import json
 from src.pipeline.orchestrator import Pipeline
 
 if __name__ == "__main__":
-    url = "https://blog.python.org/2023/10/python-3120-is-now-available.html"   # change to real URL later
+    url = "https://www.youtube.com/watch?v=8jPQjjsBbIc"  
+
 
     # 🔥 Create object (this was missing)
     pipeline = Pipeline()
@@ -15,4 +17,5 @@ if __name__ == "__main__":
     else:
         print("✅ Success:", result)
         print(url)
-        
+print("\n🚀 INFOCHOR OUTPUT\n")
+print(json.dumps(result, indent=2))
